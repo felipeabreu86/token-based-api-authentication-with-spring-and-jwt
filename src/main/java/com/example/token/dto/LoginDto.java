@@ -2,9 +2,13 @@ package com.example.token.dto;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class LoginDto {
 
     private String email;
+    
+    @JsonProperty("password")
     private String senha;
 
     public String getEmail() {

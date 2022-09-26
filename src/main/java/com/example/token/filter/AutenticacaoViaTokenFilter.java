@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,18 +21,25 @@ public class AutenticacaoViaTokenFilter extends OncePerRequestFilter {
     private TokenService tokenService;
 
     private UsuarioRepository usuarioRepository;
-    
+
+    /**
+     * Construtor.
+     * 
+     * @param tokenService - regras de negócio relacionadas ao Token.
+     * @param usuarioRepository - instância que isola a entidade Usuário do acesso ao banco de dados.
+     */
     public AutenticacaoViaTokenFilter(TokenService tokenService, UsuarioRepository usuarioRepository) {
-        super();
         this.tokenService = tokenService;
         this.usuarioRepository = usuarioRepository;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, 
+            HttpServletResponse response, 
+            FilterChain filterChain) throws ServletException, IOException {
 
-        Optional<String> token = recuperarToken(request);
+        Optional<String> token = tokenService.recuperarToken(request);
 
         if (token.isPresent() && tokenService.isValid(token.get())) {
             autenticarCliente(token.get());
@@ -42,30 +48,28 @@ public class AutenticacaoViaTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Método responsável por alterar o usuário atualmente autenticado ou remover as
+     * informações de autenticação.
+     * 
+     * @param token - Token do tipo Bearer.
+     */
     private void autenticarCliente(String token) {
-        
-        Long idUsuario = tokenService.getIdUsuario(token);
-        Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
 
-        if (usuario.isPresent()) {
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    usuario.get(),
-                    null, 
-                    usuario.get().getAuthorities());
-            
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        Optional<Long> idUsuario = tokenService.getIdUsuario(token);
+
+        if (idUsuario.isPresent()) {
+            Optional<Usuario> usuario = usuarioRepository.findById(idUsuario.get());
+
+            if (usuario.isPresent()) {
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        usuario.get(), 
+                        null, 
+                        usuario.get().getAuthorities());
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
-    }
-
-    private Optional<String> recuperarToken(HttpServletRequest request) {
-        
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        boolean tokenExists = !(token == null || token.isEmpty() || !token.startsWith("Bearer "));
-
-        return tokenExists 
-                ? Optional.of(token.substring(7, token.length()))
-                : Optional.empty();
     }
 
 }

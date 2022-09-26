@@ -62,7 +62,7 @@ public class Perfil implements GrantedAuthority {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder
-            .append("Perfil [perfil=").append(nome).append("]")
+            .append("Perfil [nome=").append(nome).append("]")
             .append("[id=").append(id).append("]");
         return builder.toString();
     }

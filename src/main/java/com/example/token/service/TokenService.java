@@ -1,69 +1,63 @@
 package com.example.token.service;
 
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 
-import com.example.token.model.Usuario;
+public interface TokenService {
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+    /**
+     * Gera um Token do tipo Bearer.
+     * 
+     * @param authentication - instância de Authentication que contêm os dados do
+     *                       usuário a ser autenticado.
+     * @return Token do tipo Bearer ou vazio (Optinal.empty()).
+     */
+    Optional<String> gerarToken(Authentication authentication);
 
-@Service
-public class TokenService {
+    /**
+     * Verifica se o token passado por parâmetro é válido.
+     * 
+     * @param token - Token do tipo Bearer.
+     * @return True ou False
+     */
+    boolean isValid(String token);
 
-    @Value("${api.jwt.expiration}")
-    private String expiration;
+    /**
+     * Retorna o Id do usuário recuperado por meio do Token passado por parâmetro.
+     * 
+     * @param token - Token do tipo Bearer.
+     * @return Id do usuário ou vazio (Optinal.empty()).
+     */
+    Optional<Long> getIdUsuario(String token);
 
-    @Value("${api.jwt.secret}")
-    private String secret;
+    /**
+     * Obtém o Token por meio do parâmetro de cabeçalho (header) "Authorization" da
+     * requisição HTTP e retorna a data de expiração deste.
+     * 
+     * @param request - requisição HTTP.
+     * @return Data de expiração do Token ou vazio (Optinal.empty()).
+     */
+    Optional<Date> getExpirationDate(HttpServletRequest request);
 
-    public String gerarToken(Authentication authentication) {
-        
-        String idUsuario = String.valueOf(((Usuario) authentication.getPrincipal()).getId());
+    /**
+     * Retorna a data de expiração do Token passado por parâmetro.
+     * 
+     * @param token - Token do tipo Bearer.
+     * @return Data de expiração do Token ou vazio (Optinal.empty()).
+     */
+    Optional<Date> getExpirationDate(String token);
 
-        Date dataAtual = new Date();
-
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.MILLISECOND, Integer.parseInt(expiration));
-        Date dataExpiracao = c.getTime();
-
-        return Jwts
-                .builder()
-                .setIssuer("Api de Autenticação")
-                .setSubject(idUsuario)
-                .setIssuedAt(dataAtual)
-                .setExpiration(dataExpiracao)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
-    }
-
-    public boolean isValid(String token) {
-        
-        boolean isValid = true;
-        
-        try {
-            Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token);
-        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | ExpiredJwtException
-                | IllegalArgumentException e) {
-            isValid = false;
-        }
-        
-        return isValid;
-    }
-
-    public Long getIdUsuario(String token) {
-        
-        Claims claims = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
-        return Long.parseLong(claims.getSubject());
-    }
+    /**
+     * Obtém o Token por meio do parâmetro de cabeçalho (header) "Authorization" da
+     * requisição HTTP.
+     * 
+     * @param request - requisição HTTP.
+     * @return Token do tipo Bearer ou vazio (Optinal.empty()).
+     */
+    Optional<String> recuperarToken(HttpServletRequest request);
 
 }
