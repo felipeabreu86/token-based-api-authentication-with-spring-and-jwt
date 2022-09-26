@@ -70,20 +70,18 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Optional<Long> getIdUsuario(String token) {
-        
-        Long id = null;
+
+        Optional<Long> idUsuario = Optional.empty();
 
         try {
             String subject = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody().getSubject();
-            
-            if (subject != null && !subject.isEmpty()) {
-                id = Long.parseLong(subject);
+
+            if (StringUtils.hasLength(subject)) {
+                idUsuario = Optional.of(Long.parseLong(subject));
             }
         } catch (Exception e) { }
 
-        return id != null 
-                ? Optional.of(id) 
-                : Optional.empty();
+        return idUsuario;
     }
     
     @Override
@@ -99,15 +97,14 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Optional<Date> getExpirationDate(String token) {
         
-        Date expiration = null;
+        Optional<Date> expirationDate = Optional.empty();
 
         try {
-            expiration = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody().getExpiration();
+            expirationDate = Optional
+                    .ofNullable(Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody().getExpiration());
         } catch (Exception e) { }
 
-        return expiration != null 
-                ? Optional.of(expiration) 
-                : Optional.empty();
+        return expirationDate;
     }
     
     @Override
