@@ -49,7 +49,7 @@ public class TokenServiceImpl implements TokenService {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
         
-        return StringUtils.hasLength(token) 
+        return StringUtils.hasText(token) 
                 ? Optional.of(token)
                 : Optional.empty();
     }
@@ -76,7 +76,7 @@ public class TokenServiceImpl implements TokenService {
         try {
             String subject = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody().getSubject();
 
-            if (StringUtils.hasLength(subject)) {
+            if (StringUtils.hasText(subject)) {
                 idUsuario = Optional.of(Long.parseLong(subject));
             }
         } catch (Exception e) { }
