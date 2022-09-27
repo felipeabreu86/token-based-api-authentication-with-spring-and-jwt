@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LoginDto {
 
     private String email;
-    
+
     @JsonProperty("password")
     private String senha;
 

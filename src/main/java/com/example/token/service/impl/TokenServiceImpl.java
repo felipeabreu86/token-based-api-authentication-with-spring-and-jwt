@@ -12,8 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.example.token.dto.DadosUsuarioDto;
 import com.example.token.model.Usuario;
 import com.example.token.service.TokenService;
+import com.example.token.util.JsonUtil;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,14 +38,14 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Optional<String> gerarToken(Authentication authentication) {
         
-        String idUsuario = String.valueOf(((Usuario) authentication.getPrincipal()).getId());
+        Usuario usuario = (Usuario) authentication.getPrincipal();        
         Date dataAtual = new Date();
         Date dataExpiracao = gerarDataExpiracao();
-
+        
         String token = Jwts
                 .builder()
                 .setIssuer("Api de Autenticação")
-                .setSubject(idUsuario)
+                .setSubject(JsonUtil.toJson(new DadosUsuarioDto(usuario)).get())
                 .setIssuedAt(dataAtual)
                 .setExpiration(dataExpiracao)
                 .signWith(SignatureAlgorithm.HS256, secret)
@@ -67,21 +69,21 @@ public class TokenServiceImpl implements TokenService {
         
         return isValid;
     }
-
+    
     @Override
-    public Optional<Long> getIdUsuario(String token) {
+    public Optional<DadosUsuarioDto> getDadosUsuario(String token) {
 
-        Optional<Long> idUsuario = Optional.empty();
+        Optional<DadosUsuarioDto> dadosUsuario = Optional.empty();
 
         try {
             String subject = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody().getSubject();
 
             if (StringUtils.hasText(subject)) {
-                idUsuario = Optional.of(Long.parseLong(subject));
+                dadosUsuario = JsonUtil.readValue(subject, DadosUsuarioDto.class);
             }
         } catch (Exception e) { }
 
-        return idUsuario;
+        return dadosUsuario;
     }
     
     @Override

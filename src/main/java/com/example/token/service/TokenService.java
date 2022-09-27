@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.core.Authentication;
 
+import com.example.token.dto.DadosUsuarioDto;
+
 public interface TokenService {
 
     /**
@@ -27,12 +29,13 @@ public interface TokenService {
     boolean isValid(String token);
 
     /**
-     * Retorna o Id do usuário recuperado por meio do Token passado por parâmetro.
+     * Retorna os dados do usuário recuperados por meio do Token passado por
+     * parâmetro.
      * 
      * @param token - Token do tipo Bearer.
-     * @return Id do usuário ou vazio (Optinal.empty()).
+     * @return Dados do usuário ou vazio (Optinal.empty()).
      */
-    Optional<Long> getIdUsuario(String token);
+    Optional<DadosUsuarioDto> getDadosUsuario(String token);
 
     /**
      * Obtém o Token por meio do parâmetro de cabeçalho (header) "Authorization" da

@@ -12,25 +12,20 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.token.model.Usuario;
-import com.example.token.repository.UsuarioRepository;
+import com.example.token.dto.DadosUsuarioDto;
 import com.example.token.service.TokenService;
 
 public class AutenticacaoViaTokenFilter extends OncePerRequestFilter {
 
     private TokenService tokenService;
 
-    private UsuarioRepository usuarioRepository;
-
     /**
      * Construtor.
      * 
      * @param tokenService - regras de negócio relacionadas ao Token.
-     * @param usuarioRepository - instância que isola a entidade Usuário do acesso ao banco de dados.
      */
-    public AutenticacaoViaTokenFilter(TokenService tokenService, UsuarioRepository usuarioRepository) {
+    public AutenticacaoViaTokenFilter(TokenService tokenService) {
         this.tokenService = tokenService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -56,19 +51,15 @@ public class AutenticacaoViaTokenFilter extends OncePerRequestFilter {
      */
     private void autenticarCliente(String token) {
 
-        Optional<Long> idUsuario = tokenService.getIdUsuario(token);
+        Optional<DadosUsuarioDto> dadosUsuario = tokenService.getDadosUsuario(token);
+        
+        if (dadosUsuario.isPresent()) {
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    dadosUsuario.get().getEmail(),
+                    null, 
+                    dadosUsuario.get().getPerfis());
 
-        if (idUsuario.isPresent()) {
-            Optional<Usuario> usuario = usuarioRepository.findById(idUsuario.get());
-
-            if (usuario.isPresent()) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        usuario.get(), 
-                        null, 
-                        usuario.get().getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
     }
 

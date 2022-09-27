@@ -18,32 +18,29 @@ public class Perfil implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
+    private String authority;
+
+    public Perfil() {
+        super();
+    }
+
+    public Perfil(String authority) {
+        this();
+        this.authority = authority;
+    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
     @Override
     public String getAuthority() {
-        return this.nome;
+        return this.authority;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome);
+        return Objects.hash(id, authority);
     }
 
     @Override
@@ -55,15 +52,15 @@ public class Perfil implements GrantedAuthority {
         if (getClass() != obj.getClass())
             return false;
         Perfil other = (Perfil) obj;
-        return Objects.equals(id, other.id) && Objects.equals(nome, other.nome);
+        return Objects.equals(id, other.id) && Objects.equals(authority, other.authority);
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder
-            .append("Perfil [nome=").append(nome).append("]")
-            .append("[id=").append(id).append("]");
+            .append("Perfil [id=").append(id).append("]")
+            .append("[authority=").append(authority).append("]");
         return builder.toString();
     }
 

@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.token.filter.AutenticacaoViaTokenFilter;
-import com.example.token.repository.UsuarioRepository;
 import com.example.token.service.TokenService;
 
 @Configuration
@@ -23,9 +22,6 @@ public class SecurityConfiguration {
 
     @Autowired
     private TokenService tokenService;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
@@ -53,10 +49,7 @@ public class SecurityConfiguration {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(new AutenticacaoViaTokenFilter(
-                        tokenService, 
-                        usuarioRepository),
-                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new AutenticacaoViaTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -2,6 +2,7 @@ package com.example.token.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +13,7 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 public class Usuario implements UserDetails {
@@ -31,36 +33,39 @@ public class Usuario implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Perfil> perfis = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    public Usuario() {
+        super();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Usuario(String nome, String email, String senha) {
+        this();
+        this.nome = nome;
+        this.email = email;
+        setSenha(senha);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
     public void setSenha(String senha) {
-        this.senha = senha;
+        this.senha = new BCryptPasswordEncoder().encode(Objects.requireNonNull(senha));
+    }
+
+    public void addPerfil(Perfil perfil) {
+        if (!perfis.contains(perfil)) {
+            perfis.add(perfil);
+        }
+    }
+
+    public void removePerfil(Perfil perfil) {
+        if (perfis.size() > 1 && perfis.contains(perfil)) {
+            perfis.remove(perfil);
+        }
     }
 
     @Override
@@ -97,7 +102,7 @@ public class Usuario implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -122,7 +127,7 @@ public class Usuario implements UserDetails {
             return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
