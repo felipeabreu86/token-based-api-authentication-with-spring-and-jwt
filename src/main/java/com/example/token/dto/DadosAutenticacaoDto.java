@@ -1,6 +1,7 @@
 package com.example.token.dto;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,6 +11,20 @@ public class DadosAutenticacaoDto {
 
     @JsonProperty("expiration_date")
     private Date dataExpiracao;
+
+    public DadosAutenticacaoDto() {
+        super();
+    }
+
+    public DadosAutenticacaoDto(String emailUsuarioAutenticado, Optional<Date> tokenExpirationDate) {
+        this();
+
+        setEmail(emailUsuarioAutenticado);
+
+        if (tokenExpirationDate.isPresent()) {
+            setDataExpiracao(tokenExpirationDate.get());
+        }
+    }
 
     public String getEmail() {
         return email;

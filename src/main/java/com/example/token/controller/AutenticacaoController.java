@@ -1,7 +1,6 @@
 package com.example.token.controller;
 
 import java.security.Principal;
-import java.util.Date;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,16 +69,8 @@ public class AutenticacaoController {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DadosAutenticacaoDto> validarAutenticacao(HttpServletRequest request, Principal principal) {
 
-        DadosAutenticacaoDto dto = new DadosAutenticacaoDto();
-        dto.setEmail(principal.getName());       
-
-        Optional<Date> expiration = tokenService.getExpirationDate(request);
-        
-        if (expiration.isPresent()) {
-            dto.setDataExpiracao(expiration.get());
-        }
-
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(
+                new DadosAutenticacaoDto(principal.getName(), tokenService.getExpirationDate(request)));
     }
 
 }
